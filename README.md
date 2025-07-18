@@ -5,7 +5,8 @@ A comprehensive Django-based personal finance management system with modern UI, 
 ## 📸 Application Screenshots
 
 ### Dashboard Overview
-![Dashboard Screenshot](<img width="1894" height="887" alt="image" src="https://github.com/user-attachments/assets/931d8155-3104-4500-8245-f472a7632425" />
+![Dashboard Screenshot](<img width="1884" height="885" alt="image" src="https://github.com/user-attachments/assets/85ed6a08-b1f5-4b81-aea8-03daf772a9e0" />
+
 )
 *Main dashboard showing account balances, recent transactions, and quick actions*
 
