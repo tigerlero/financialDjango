@@ -150,7 +150,6 @@ docker-compose exec web python manage.py generate_sample_data
 4. **Access the Application**
 - **Main App**: http://localhost:8000
 - **Admin Interface**: http://localhost:8000/admin
-- **API Documentation**: http://localhost:8000/api/docs
 
 ### Local Development Setup
 
