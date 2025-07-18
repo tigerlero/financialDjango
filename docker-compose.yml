@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: financeapp
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://django:django123@db:5432/financeapp
+      - REDIS_URL=redis://redis:6379/1
+
+  celery:
+    build: .
+    command: celery -A financeapp worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://django:django123@db:5432/financeapp
+      - REDIS_URL=redis://redis:6379/1
+
+volumes:
+  postgres_data:

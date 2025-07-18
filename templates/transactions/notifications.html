@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Finance App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Notifications</h1>
+                    <p class="text-muted">Stay updated with your financial activities</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="filter" id="all" checked>
+                                <label class="btn btn-outline-primary" for="all">All</label>
+                                
+                                <input type="radio" class="btn-check" name="filter" id="unread">
+                                <label class="btn btn-outline-primary" for="unread">Unread</label>
+                                
+                                <input type="radio" class="btn-check" name="filter" id="read">
+                                <label class="btn btn-outline-primary" for="read">Read</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="typeFilter" id="allTypes" checked>
+                                <label class="btn btn-outline-secondary" for="allTypes">All Types</label>
+                                
+                                <input type="radio" class="btn-check" name="typeFilter" id="warning">
+                                <label class="btn btn-outline-warning" for="warning">Warnings</label>
+                                
+                                <input type="radio" class="btn-check" name="typeFilter" id="success">
+                                <label class="btn btn-outline-success" for="success">Success</label>
+                                
+                                <input type="radio" class="btn-check" name="typeFilter" id="info">
+                                <label class="btn btn-outline-info" for="info">Info</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Notifications</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                        <div class="list-group-item {% if not notification.read %}bg-light{% endif %} notification-item" 
+                             data-type="{{ notification.type }}" 
+                             data-read="{{ notification.read|yesno:'true,false' }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="d-flex align-items-start">
+                                    <div class="stats-icon {{ notification.type }} me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                        <i class="fas fa-{{ notification.type|yesno:'exclamation-triangle,check-circle,info-circle' }}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-1">{{ notification.title }}</h6>
+                                            {% if not notification.read %}
+                                            <span class="badge bg-primary rounded-pill">New</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-1">{{ notification.message }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ notification.timestamp|timesince }} ago
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% if not notification.read %}
+                                        <li><a class="dropdown-item" href="#" onclick="markAsRead({{ notification.id }})">
+                                            <i class="fas fa-check"></i> Mark as Read
+                                        </a></li>
+                                        {% else %}
+                                        <li><a class="dropdown-item" href="#" onclick="markAsUnread({{ notification.id }})">
+                                            <i class="fas fa-envelope"></i> Mark as Unread
+                                        </a></li>
+                                        {% endif %}
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteNotification({{ notification.id }})">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No notifications</h5>
+                            <p class="text-muted">You're all caught up! Check back later for updates.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="notificationSettingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                        <label class="form-check-label" for="emailNotifications">
+                                            Email Notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="lowBalanceAlerts" checked>
+                                        <label class="form-check-label" for="lowBalanceAlerts">
+                                            Low Balance Alerts
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="transactionAlerts" checked>
+                                        <label class="form-check-label" for="transactionAlerts">
+                                            Transaction Alerts
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="monthlyReports" checked>
+                                        <label class="form-check-label" for="monthlyReports">
+                                            Monthly Reports
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="securityAlerts" checked>
+                                        <label class="form-check-label" for="securityAlerts">
+                                            Security Alerts
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="marketingEmails">
+                                        <label class="form-check-label" for="marketingEmails">
+                                            Marketing Emails
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    /* Dark mode notification styling */
+    [data-theme="dark"] .list-group-item {
+        background-color: var(--bg-secondary) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .list-group-item.bg-light {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .list-group-item:hover {
+        background-color: #404040 !important;
+    }
+
+    [data-theme="dark"] .notification-item {
+        background-color: var(--bg-secondary) !important;
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .notification-item.bg-light {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    [data-theme="dark"] .card {
+        background-color: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+    }
+
+    [data-theme="dark"] .card-body {
+        background-color: var(--card-bg) !important;
+    }
+
+    [data-theme="dark"] h6, 
+    [data-theme="dark"] p {
+        color: var(--text-primary) !important;
+    }
+</style>
+<script>
+// Filter notifications
+function filterNotifications() {
+    const readFilter = document.querySelector('input[name="filter"]:checked').id;
+    const typeFilter = document.querySelector('input[name="typeFilter"]:checked').id;
+    const notifications = document.querySelectorAll('.notification-item');
+    
+    notifications.forEach(item => {
+        let showItem = true;
+        
+        // Read/unread filter
+        if (readFilter === 'read' && item.dataset.read === 'false') {
+            showItem = false;
+        } else if (readFilter === 'unread' && item.dataset.read === 'true') {
+            showItem = false;
+        }
+        
+        // Type filter
+        if (typeFilter !== 'allTypes' && item.dataset.type !== typeFilter) {
+            showItem = false;
+        }
+        
+        item.style.display = showItem ? 'block' : 'none';
+    });
+}
+
+// Add event listeners to filter buttons
+document.querySelectorAll('input[name="filter"], input[name="typeFilter"]').forEach(input => {
+    input.addEventListener('change', filterNotifications);
+});
+
+// Mark all as read
+function markAllAsRead() {
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.classList.remove('bg-light');
+        item.dataset.read = 'true';
+        const badge = item.querySelector('.badge');
+        if (badge) {
+            badge.remove();
+        }
+    });
+    showToast('All notifications marked as read', 'success');
+}
+
+// Mark single notification as read
+function markAsRead(id) {
+    const notification = document.querySelector(`[data-id="${id}"]`);
+    if (notification) {
+        notification.classList.remove('bg-light');
+        notification.dataset.read = 'true';
+        const badge = notification.querySelector('.badge');
+        if (badge) {
+            badge.remove();
+        }
+    }
+    showToast('Notification marked as read', 'success');
+}
+
+// Mark single notification as unread
+function markAsUnread(id) {
+    const notification = document.querySelector(`[data-id="${id}"]`);
+    if (notification) {
+        notification.classList.add('bg-light');
+        notification.dataset.read = 'false';
+        const titleElement = notification.querySelector('h6');
+        if (titleElement && !titleElement.querySelector('.badge')) {
+            titleElement.insertAdjacentHTML('afterend', '<span class="badge bg-primary rounded-pill">New</span>');
+        }
+    }
+    showToast('Notification marked as unread', 'info');
+}
+
+// Delete notification
+function deleteNotification(id) {
+    if (confirm('Are you sure you want to delete this notification?')) {
+        const notification = document.querySelector(`[data-id="${id}"]`);
+        if (notification) {
+            notification.remove();
+        }
+        showToast('Notification deleted', 'success');
+    }
+}
+
+// Handle notification settings form
+document.getElementById('notificationSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    showToast('Notification settings saved', 'success');
+});
+</script>
+{% endblock %}

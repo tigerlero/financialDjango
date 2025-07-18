@@ -1,0 +1,889 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Finance App Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-wallet" style="color: #667eea; margin-right: 10px;"></i>
+        Finance App Admin
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div style="float: right; margin-top: 10px;">
+    <a href="/dashboard/" style="color: #667eea; text-decoration: none; margin-right: 15px;">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/analytics/" style="color: #667eea; text-decoration: none; margin-right: 15px;">
+        <i class="fas fa-chart-line"></i> Analytics
+    </a>
+    <a href="#" onclick="toggleTheme()" id="themeToggle" style="color: #667eea; text-decoration: none; margin-right: 15px; cursor: pointer;">
+        <i class="fas fa-moon"></i> <span id="themeText">Dark</span>
+    </a>
+    <a href="/admin/logout/" style="color: #667eea; text-decoration: none;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script>
+// Initialize theme immediately to prevent flash
+(function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+})();
+</script>
+<style>
+    :root {
+        /* Light theme */
+        --bg-color: #ffffff;
+        --text-color: #333333;
+        --card-bg: #ffffff;
+        --border-color: #dee2e6;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --nav-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    [data-theme="dark"] {
+        /* Dark theme */
+        --bg-color: #1a1a1a;
+        --text-color: #e9ecef;
+        --card-bg: #2d2d2d;
+        --border-color: #495057;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --nav-bg: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    }
+
+    body {
+        background-color: var(--bg-color) !important;
+        color: var(--text-color) !important;
+    }
+
+    #content {
+        background: var(--bg-color) !important;
+        color: var(--text-color) !important;
+    }
+
+    #container {
+        background: var(--bg-color) !important;
+    }
+
+    #content-main {
+        background: var(--bg-color) !important;
+    }
+
+    .dashboard .module {
+        background: var(--card-bg);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .dashboard .module table {
+        background: var(--card-bg);
+    }
+
+    .dashboard .module table td,
+    .dashboard .module table th {
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .results {
+        background: var(--card-bg);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .results tbody tr:nth-child(even) {
+        background: var(--bg-color);
+    }
+
+    .breadcrumbs {
+        background: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-color) !important;
+    }
+
+    .form-row .field-box {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    input[type="text"], input[type="password"], input[type="email"], 
+    input[type="number"], textarea, select {
+        background: var(--card-bg) !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    #header {
+        background: var(--nav-bg) !important;
+        border-bottom: none;
+    }
+
+    /* Dark mode text color overrides */
+    [data-theme="dark"] body,
+    [data-theme="dark"] #content,
+    [data-theme="dark"] .dashboard .module table td,
+    [data-theme="dark"] .dashboard .module table th,
+    [data-theme="dark"] .breadcrumbs,
+    [data-theme="dark"] p,
+    [data-theme="dark"] h1, 
+    [data-theme="dark"] h2, 
+    [data-theme="dark"] h3, 
+    [data-theme="dark"] h4, 
+    [data-theme="dark"] h5, 
+    [data-theme="dark"] h6 {
+        color: var(--text-color) !important;
+    }
+
+    [data-theme="dark"] .dashboard .module table tbody tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Dark mode for any notification or alert elements */
+    [data-theme="dark"] .list-group-item,
+    [data-theme="dark"] .notification-item {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-color) !important;
+    }
+
+    [data-theme="dark"] .list-group-item.bg-light,
+    [data-theme="dark"] .notification-item.bg-light {
+        background-color: #3a3a3a !important;
+    }
+
+    [data-theme="dark"] .alert {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-color) !important;
+    }
+    
+    #site-name a {
+        color: white !important;
+        text-decoration: none !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+    }
+    
+    #site-name a:hover {
+        opacity: 0.9;
+    }
+    
+    .breadcrumbs {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 10px 20px;
+    }
+    
+    .breadcrumbs a {
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .breadcrumbs a:hover {
+        color: #764ba2;
+    }
+    
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 5px 5px 0 0;
+        padding: 10px 15px;
+        margin: 0;
+    }
+    
+    .button, input[type=submit], input[type=button], .submit-row input, .submit-row a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none !important;
+        color: white !important;
+        padding: 8px 16px !important;
+        border-radius: 5px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, .submit-row a:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+    }
+    
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    }
+    
+    .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4) !important;
+    }
+    
+    .deletelink {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    }
+    
+    .deletelink:hover {
+        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4) !important;
+    }
+    
+    .selector-chooser h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 5px 5px 0 0;
+        padding: 10px 15px;
+        margin: 0;
+    }
+    
+    .selector-add, .selector-remove {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none !important;
+        color: white !important;
+        padding: 5px 10px !important;
+        border-radius: 3px !important;
+        cursor: pointer !important;
+    }
+    
+    .selector-add:hover, .selector-remove:hover {
+        opacity: 0.9;
+    }
+    
+    .paginator .this-page {
+        background: #667eea;
+        color: white;
+        border-radius: 3px;
+        padding: 5px 10px;
+    }
+    
+    .paginator a {
+        color: #667eea;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+    }
+    
+    .paginator a:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .results th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #667eea;
+        padding: 10px;
+        font-weight: 600;
+    }
+    
+    .results th a {
+        color: #333;
+        text-decoration: none;
+    }
+    
+    .results th a:hover {
+        color: #667eea;
+    }
+    
+    .results tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .object-tools {
+        float: right;
+        margin-top: 10px;
+    }
+    
+    .object-tools a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-left: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .object-tools a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .addlink {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    }
+    
+    .addlink:hover {
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4) !important;
+    }
+    
+    .changelink {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    }
+    
+    .changelink:hover {
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4) !important;
+    }
+    
+    .actions {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .actions select {
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+        padding: 5px;
+    }
+    
+    .actions .button {
+        margin-left: 10px;
+    }
+    
+    .errorlist {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        color: #856404;
+    }
+    
+    .errorlist li {
+        list-style: none;
+        margin: 0;
+    }
+    
+    .inline-group {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .inline-group .tabular {
+        border: none;
+    }
+    
+    .inline-group .tabular thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px;
+        font-weight: 600;
+    }
+    
+    .fieldset {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        padding: 0;
+    }
+    
+    .fieldset h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 15px;
+        margin: 0;
+        border-radius: 5px 5px 0 0;
+    }
+    
+    .fieldset .fieldBox {
+        padding: 15px;
+    }
+    
+    .collapse {
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .collapse h2 {
+        background: #f8f9fa;
+        color: #333;
+        cursor: pointer;
+        padding: 10px 15px;
+    }
+    
+    .collapse h2:hover {
+        background: #e9ecef;
+    }
+    
+    .vTextField, .vURLField, .vEmailField, .vIntegerField, .vFloatField, .vDateField, .vTimeField, .vDateTimeField, textarea, select {
+        border: 1px solid #dee2e6;
+        border-radius: 3px;
+        padding: 8px;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .vTextField:focus, .vURLField:focus, .vEmailField:focus, .vIntegerField:focus, .vFloatField:focus, .vDateField:focus, .vTimeField:focus, .vDateTimeField:focus, textarea:focus, select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .help {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .dashboard #content {
+        width: 100%;
+    }
+    
+    .dashboard .module {
+        margin-bottom: 20px;
+    }
+    
+    .dashboard .module table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .dashboard .module table th, .dashboard .module table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .dashboard .module table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .dashboard .module table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .dashboard .module table a {
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .dashboard .module table a:hover {
+        color: #764ba2;
+    }
+    
+    /* Improve Add links readability */
+    .dashboard .module table .addlink {
+        display: inline-block;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white !important;
+        padding: 6px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+        min-width: 60px;
+        text-align: center;
+    }
+    
+    .dashboard .module table .addlink:hover {
+        background: linear-gradient(135deg, #0e8074 0%, #2fd468 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        color: white !important;
+    }
+    
+    .dashboard .module table .addlink:before {
+        content: "✚ ";
+        font-weight: bold;
+    }
+    
+    /* Improve model names in dashboard */
+    .dashboard .module h2 a {
+        color: white !important;
+        text-decoration: none !important;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.3px;
+    }
+    
+    .dashboard .module h2 a:hover {
+        opacity: 0.9;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Add icons to model names */
+    .dashboard .module h2 a[href*="auth/user"]:before {
+        content: "👥 ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="auth/group"]:before {
+        content: "🏷️ ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="transactions/account"]:before {
+        content: "🏦 ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="transactions/transaction"]:before {
+        content: "💳 ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="transactions/category"]:before {
+        content: "📂 ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="transactions/paymentmethod"]:before {
+        content: "💰 ";
+        font-size: 1.2em;
+    }
+    
+    .dashboard .module h2 a[href*="transactions/recurringtransaction"]:before {
+        content: "🔄 ";
+        font-size: 1.2em;
+    }
+    
+    /* Better spacing for model links */
+    .dashboard .module table th:last-child,
+    .dashboard .module table td:last-child {
+        text-align: right;
+        width: 100px;
+    }
+    
+    /* Improve main admin navigation */
+    .breadcrumbs {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #667eea;
+        padding: 15px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumbs a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 3px 8px;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+    }
+    
+    .breadcrumbs a:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    /* Improve main content area */
+    #content {
+        padding: 20px;
+        background: #f8f9fa;
+        min-height: calc(100vh - 120px);
+    }
+    
+    /* Better form styling */
+    .form-row {
+        margin-bottom: 20px;
+    }
+    
+    .form-row .field-box {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-row label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    /* Improve table readability */
+    .results {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-top: 20px;
+    }
+    
+    .results tbody tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    .results tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .results tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* Improve main dashboard text readability */
+    .dashboard .module h2 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        border-radius: 5px 5px 0 0;
+        padding: 18px 25px;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.5px;
+    }
+    
+    .dashboard .module caption {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        border-radius: 5px 5px 0 0;
+        padding: 18px 25px;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.5px;
+    }
+    
+    /* Improve model list text */
+    .dashboard .module table th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #667eea;
+        padding: 12px 15px;
+        font-weight: 600;
+        color: #333 !important;
+        font-size: 0.95rem;
+    }
+    
+    .dashboard .module table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+        color: #495057 !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+    
+    .dashboard .module table a {
+        color: #667eea !important;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .dashboard .module table a:hover {
+        color: #764ba2 !important;
+        text-decoration: underline;
+    }
+    
+    /* Better form text readability */
+    .form-row label {
+        font-weight: 700 !important;
+        color: #333 !important;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 1rem;
+    }
+    
+    .help, .help-text {
+        font-size: 0.9rem !important;
+        color: #495057 !important;
+        margin-top: 5px;
+        line-height: 1.4;
+        font-weight: 500;
+    }
+    
+    /* Password change form improvements */
+    .password-change-form .form-row {
+        margin-bottom: 25px;
+    }
+    
+    .password-change-form label {
+        font-weight: 700 !important;
+        color: #333 !important;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .password-change-form .helptext {
+        font-size: 0.9rem !important;
+        color: #495057 !important;
+        margin-top: 8px;
+        line-height: 1.5;
+        font-weight: 500;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        border-left: 3px solid #667eea;
+    }
+    
+    .password-change-form .helptext ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+    
+    .password-change-form .helptext li {
+        margin-bottom: 5px;
+        color: #495057 !important;
+    }
+    
+    /* Improve main page text */
+    #content p {
+        color: #495057 !important;
+        font-size: 1rem;
+        line-height: 1.5;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
+    
+    /* Better section headers */
+    .dashboard .module:first-child h2 {
+        margin-top: 0;
+    }
+    
+    .dashboard .module {
+        margin-bottom: 25px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Improve general text contrast */
+    body {
+        color: #333 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #333 !important;
+        font-weight: 600;
+    }
+    
+    /* Better input field styling */
+    input[type="text"], input[type="password"], input[type="email"], 
+    input[type="number"], textarea, select {
+        border: 2px solid #dee2e6 !important;
+        border-radius: 5px !important;
+        padding: 10px 12px !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        background: white !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    input[type="text"]:focus, input[type="password"]:focus, 
+    input[type="email"]:focus, input[type="number"]:focus, 
+    textarea:focus, select:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        outline: none !important;
+    }
+    
+    /* Improve error message readability */
+    .errorlist {
+        background: #fff5f5 !important;
+        border: 1px solid #feb2b2 !important;
+        border-left: 4px solid #f56565 !important;
+        border-radius: 5px !important;
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+        color: #c53030 !important;
+        font-weight: 500 !important;
+    }
+    
+    .errorlist li {
+        list-style: none !important;
+        margin: 0 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* Better success message styling */
+    .success, .info {
+        background: #f0fff4 !important;
+        border: 1px solid #9ae6b4 !important;
+        border-left: 4px solid #48bb78 !important;
+        border-radius: 5px !important;
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+        color: #2f855a !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Improve pagination text */
+    .paginator {
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        margin-top: 20px;
+    }
+    
+    .paginator a {
+        color: #667eea !important;
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .paginator a:hover {
+        background: #667eea !important;
+        color: white !important;
+    }
+    
+    .paginator .this-page {
+        background: #667eea !important;
+        color: white !important;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+// Theme System
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    const themeToggle = document.getElementById('themeToggle');
+    const themeText = document.getElementById('themeText');
+    const icon = themeToggle.querySelector('i');
+    
+    if (newTheme === 'dark') {
+        icon.className = 'fas fa-sun';
+        themeText.textContent = 'Light';
+    } else {
+        icon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark';
+    }
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    const themeToggle = document.getElementById('themeToggle');
+    const themeText = document.getElementById('themeText');
+    const icon = themeToggle.querySelector('i');
+    
+    if (savedTheme === 'dark') {
+        icon.className = 'fas fa-sun';
+        themeText.textContent = 'Light';
+    } else {
+        icon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark';
+    }
+});
+</script>
+{% endblock %}

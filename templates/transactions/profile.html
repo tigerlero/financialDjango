@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Finance App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">My Profile</h1>
+                    <p class="text-muted">View and manage your profile information</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="stats-icon primary mb-3" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4 class="mb-1">{{ user.first_name|default:user.username }} {{ user.last_name }}</h4>
+                    <p class="text-muted mb-3">{{ user.email }}</p>
+                    <p class="text-muted small">
+                        <i class="fas fa-calendar"></i> 
+                        Member since {{ user.date_joined|date:"F Y" }}
+                    </p>
+                    <div class="d-grid">
+                        <a href="{% url 'settings' %}" class="btn btn-primary">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Account Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h4 mb-0 text-primary">{{ accounts.count }}</div>
+                            <small class="text-muted">Accounts</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 mb-0 text-success">${{ total_balance|floatformat:2 }}</div>
+                            <small class="text-muted">Total Balance</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 mb-0 text-info">{{ recent_transactions|length }}</div>
+                            <small class="text-muted">Recent Transactions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="col-lg-8">
+            <!-- Account Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Account Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Username</label>
+                                <div class="fw-medium">{{ user.username }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Email</label>
+                                <div class="fw-medium">{{ user.email }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">First Name</label>
+                                <div class="fw-medium">{{ user.first_name|default:"Not set" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Last Name</label>
+                                <div class="fw-medium">{{ user.last_name|default:"Not set" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Date Joined</label>
+                                <div class="fw-medium">{{ user.date_joined|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Last Login</label>
+                                <div class="fw-medium">{{ user.last_login|date:"F d, Y g:i A"|default:"Never" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Accounts -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">My Accounts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Type</th>
+                                    <th>Balance</th>
+                                    <th>Created</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in accounts %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ account.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ account.account_number }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ account.get_account_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="{% if account.get_balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                            ${{ account.get_balance|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>{{ account.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'account_detail' account.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No accounts found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% for transaction in recent_transactions %}
+                    <div class="transaction-row {{ transaction.transaction_type }} mb-3">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="stats-icon {{ transaction.transaction_type|yesno:'success,warning' }} me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                    <i class="fas fa-{{ transaction.transaction_type|yesno:'plus,minus' }}"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium">{{ transaction.description }}</div>
+                                    <small class="text-muted">{{ transaction.account.name }} • {{ transaction.transaction_date|date:"M d, Y g:i A" }}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-medium {{ transaction.transaction_type|yesno:'text-success,text-danger' }}">
+                                    {{ transaction.transaction_type|yesno:'+,-' }}${{ transaction.amount|floatformat:2 }}
+                                </div>
+                                <small class="text-muted">{{ transaction.get_status_display }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No recent transactions</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

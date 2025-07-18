@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Finance App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ user.first_name|default:user.username }}</p>
+        </div>
+    </div>
+    
+    <!-- Account Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Balance</h6>
+                            <h3 class="mb-0" id="total-balance">{{ total_balance|floatformat:2 }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-wallet fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Active Accounts</h6>
+                            <h3 class="mb-0">{{ accounts.count }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-university fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">This Month</h6>
+                            <h3 class="mb-0" id="monthly-spending">$0.00</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Pending</h6>
+                            <h3 class="mb-0" id="pending-count">0</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button class="btn btn-primary btn-lg w-100 mb-2" data-bs-toggle="modal" data-bs-target="#quickTransactionModal">
+                                <i class="fas fa-plus"></i> Quick Transaction
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-success btn-lg w-100 mb-2" data-bs-toggle="modal" data-bs-target="#transferModal">
+                                <i class="fas fa-exchange-alt"></i> Transfer Funds
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Accounts and Recent Transactions -->
+    <div class="row">
+        <!-- Accounts -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="card-title mb-0">Your Accounts</h5>
+                    <a href="{% url 'account_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for account in accounts %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card account-card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ account.name }}</h6>
+                                    <p class="text-muted mb-2">{{ account.get_account_type_display }}</p>
+                                    <h4 class="mb-0 {% if account.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                        ${{ account.balance|floatformat:2 }}
+                                    </h4>
+                                    <small class="text-muted">{{ account.account_number }}</small>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{% url 'account_detail' account.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted text-center">No accounts found. <a href="#" class="btn btn-link">Create your first account</a></p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="card-title mb-0">Recent Transactions</h5>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div id="recent-transactions">
+                        {% for transaction in recent_transactions %}
+                        <div class="transaction-row {{ transaction.transaction_type }} p-3 mb-2 bg-light rounded">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ transaction.description }}</h6>
+                                    <small class="text-muted">{{ transaction.account.name }} • {{ transaction.transaction_date|date:"M d, Y" }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="h6 {% if transaction.transaction_type == 'credit' %}text-success{% else %}text-danger{% endif %}">
+                                        {% if transaction.transaction_type == 'credit' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                                    </span>
+                                    <br>
+                                    <small class="badge bg-{{ transaction.status|yesno:'success,warning,danger' }}">
+                                        {{ transaction.get_status_display }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted text-center">No recent transactions</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Spending Chart -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Monthly Spending Overview</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="spendingChart" width="400" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Transaction Modal -->
+<div class="modal fade" id="quickTransactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickTransactionForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="account" class="form-label">Account</label>
+                        <select class="form-select" id="account" name="account_id" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }} ({{ account.balance|floatformat:2 }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transaction_type" class="form-label">Type</label>
+                        <select class="form-select" id="transaction_type" name="transaction_type" required>
+                            <option value="debit">Expense (Debit)</option>
+                            <option value="credit">Income (Credit)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transfer Funds</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="transferForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="from_account" class="form-label">From Account</label>
+                        <select class="form-select" id="from_account" name="from_account_id" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }} ({{ account.balance|floatformat:2 }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="to_account" class="form-label">To Account</label>
+                        <select class="form-select" id="to_account" name="to_account_id" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transfer_amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="transfer_amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transfer_description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="transfer_description" name="description" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Transfer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Initialize spending chart
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    const spendingChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Monthly Spending',
+                data: [1200, 1900, 800, 1500, 2000, 1800],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Quick transaction form submission
+    $('#quickTransactionForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            account_id: $('#account').val(),
+            amount: $('#amount').val(),
+            description: $('#description').val(),
+            transaction_type: $('#transaction_type').val()
+        };
+        
+        $.ajax({
+            url: '{% url "quick_transaction" %}',
+            method: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(response) {
+                if (response.success) {
+                    showToast('Transaction created successfully!', 'success');
+                    $('#quickTransactionModal').modal('hide');
+                    $('#quickTransactionForm')[0].reset();
+                    
+                    // Update account balance display
+                    updateAccountBalance(formData.account_id, response.new_balance);
+                    
+                    // Refresh recent transactions
+                    loadRecentTransactions();
+                } else {
+                    showToast('Error: ' + response.error, 'error');
+                }
+            },
+            error: function(xhr) {
+                showToast('Error creating transaction', 'error');
+            }
+        });
+    });
+    
+    // Transfer form submission
+    $('#transferForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            from_account_id: $('#from_account').val(),
+            to_account_id: $('#to_account').val(),
+            amount: $('#transfer_amount').val(),
+            description: $('#transfer_description').val()
+        };
+        
+        if (formData.from_account_id === formData.to_account_id) {
+            showToast('Cannot transfer to the same account', 'error');
+            return;
+        }
+        
+        $.ajax({
+            url: '/api/transactions/transfer/',
+            method: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(response) {
+                showToast('Transfer completed successfully!', 'success');
+                $('#transferModal').modal('hide');
+                $('#transferForm')[0].reset();
+                
+                // Refresh page to update all balances
+                location.reload();
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || 'Transfer failed';
+                showToast('Error: ' + error, 'error');
+            }
+        });
+    });
+    
+    function updateAccountBalance(accountId, newBalance) {
+        // Update account balance in the UI
+        $(`.account-card[data-account-id="${accountId}"] .balance`).text('$' + newBalance);
+    }
+    
+    function loadRecentTransactions() {
+        // Reload recent transactions via AJAX
+        $.ajax({
+            url: '{% url "transaction_search" %}',
+            method: 'GET',
+            data: { limit: 5 },
+            success: function(response) {
+                // Update recent transactions display
+                updateRecentTransactions(response.transactions);
+            }
+        });
+    }
+    
+    function updateRecentTransactions(transactions) {
+        const container = $('#recent-transactions');
+        container.empty();
+        
+        if (transactions.length === 0) {
+            container.html('<p class="text-muted text-center">No recent transactions</p>');
+            return;
+        }
+        
+        transactions.forEach(function(txn) {
+            const html = `
+                <div class="transaction-row ${txn.transaction_type} p-3 mb-2 bg-light rounded">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">${txn.description}</h6>
+                            <small class="text-muted">${txn.account} • ${txn.date}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="h6 ${txn.transaction_type === 'credit' ? 'text-success' : 'text-danger'}">
+                                ${txn.transaction_type === 'credit' ? '+' : '-'}$${txn.amount.toFixed(2)}
+                            </span>
+                            <br>
+                            <small class="badge bg-${txn.status === 'completed' ? 'success' : 'warning'}">
+                                ${txn.status}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.append(html);
+        });
+    }
+});
+</script>
+{% endblock %}

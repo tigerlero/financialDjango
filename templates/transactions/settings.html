@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Finance App{% endblock %}
+
+{% block content %}
+<style>
+    /* Ensure proper contrast for settings page */
+    .form-label {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--input-bg) !important;
+        border-color: #667eea !important;
+        color: var(--text-primary) !important;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+    }
+    
+    .form-check-label {
+        color: var(--text-primary) !important;
+        font-weight: 500 !important;
+    }
+    
+    .form-text {
+        color: var(--text-muted) !important;
+    }
+    
+    .card-body {
+        background-color: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .card-body p {
+        color: var(--text-secondary) !important;
+    }
+    
+    .btn {
+        transition: all 0.3s ease !important;
+    }
+</style>
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0" style="color: var(--text-primary); font-weight: 700;">Settings</h1>
+                    <p style="color: var(--text-secondary);">Manage your application preferences</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Account Settings -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header" style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
+                    <h5 class="card-title mb-0" style="color: var(--text-primary); font-weight: 600;">Account Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="accountSettingsForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.first_name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.last_name }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ user.username }}" readonly>
+                            <small class="form-text text-muted">Username cannot be changed</small>
+                        </div>
+                        <input type="hidden" name="update_account" value="1">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="card mb-4">
+                <div class="card-header" style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
+                    <h5 class="card-title mb-0" style="color: var(--text-primary); font-weight: 600;">Security Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="passwordChangeForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" name="old_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="new_password1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="new_password2" required>
+                        </div>
+                        <input type="hidden" name="change_password" value="1">
+                        <button type="submit" class="btn btn-warning">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Preferences -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header" style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
+                    <h5 class="card-title mb-0" style="color: var(--text-primary); font-weight: 600;">Preferences</h5>
+                </div>
+                <div class="card-body">
+                    <form id="preferencesForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="currency" class="form-label">Default Currency</label>
+                            <select class="form-select" id="currency" name="default_currency">
+                                <option value="USD" {% if preferences.default_currency == 'USD' %}selected{% endif %}>USD ($)</option>
+                                <option value="EUR" {% if preferences.default_currency == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                                <option value="GBP" {% if preferences.default_currency == 'GBP' %}selected{% endif %}>GBP (£)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateFormat" class="form-label">Date Format</label>
+                            <select class="form-select" id="dateFormat" name="date_format">
+                                <option value="MM/DD/YYYY" {% if preferences.date_format == 'MM/DD/YYYY' %}selected{% endif %}>MM/DD/YYYY</option>
+                                <option value="DD/MM/YYYY" {% if preferences.date_format == 'DD/MM/YYYY' %}selected{% endif %}>DD/MM/YYYY</option>
+                                <option value="YYYY-MM-DD" {% if preferences.date_format == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Language</label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="en" {% if preferences.language == 'en' %}selected{% endif %}>English</option>
+                                <option value="es" {% if preferences.language == 'es' %}selected{% endif %}>Spanish</option>
+                                <option value="fr" {% if preferences.language == 'fr' %}selected{% endif %}>French</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="theme" class="form-label">Theme</label>
+                            <select class="form-select" id="theme" name="theme" onchange="previewTheme(this.value)">
+                                <option value="light" {% if preferences.theme == 'light' %}selected{% endif %}>🌞 Light Theme</option>
+                                <option value="dark" {% if preferences.theme == 'dark' %}selected{% endif %}>🌙 Dark Theme</option>
+                                <option value="auto" {% if preferences.theme == 'auto' %}selected{% endif %}>🔄 Auto (System)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" name="email_notifications" {% if preferences.email_notifications %}checked{% endif %}>
+                                <label class="form-check-label" for="emailNotifications">
+                                    Email Notifications
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lowBalanceAlerts" name="low_balance_alerts" {% if preferences.low_balance_alerts %}checked{% endif %}>
+                                <label class="form-check-label" for="lowBalanceAlerts">
+                                    Low Balance Alerts
+                                </label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="update_preferences" value="1">
+                        <button type="submit" class="btn btn-success">Save Preferences</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Export Data -->
+            <div class="card">
+                <div class="card-header" style="background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color);">
+                    <h5 class="card-title mb-0" style="color: var(--text-primary); font-weight: 600;">Data Export</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Export your financial data for backup or analysis</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="exportData('json')">
+                            <i class="fas fa-file-code"></i> Export as JSON
+                        </button>
+                        <button class="btn btn-outline-success" onclick="exportData('csv')">
+                            <i class="fas fa-file-csv"></i> Export as CSV
+                        </button>
+                        <button class="btn btn-outline-info" onclick="exportData('pdf')">
+                            <i class="fas fa-file-pdf"></i> Export as PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Handle account settings form
+document.getElementById('accountSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "settings" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            // Update the form with new values to reflect the saved state
+            document.getElementById('firstName').value = formData.get('first_name');
+            document.getElementById('lastName').value = formData.get('last_name');
+            document.getElementById('email').value = formData.get('email');
+        } else {
+            showToast('Error saving settings: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error saving settings', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Handle password change form
+document.getElementById('passwordChangeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "settings" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            // Reset the form on successful password change
+            this.reset();
+        } else {
+            showToast('Error changing password: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error changing password', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Handle preferences form
+document.getElementById('preferencesForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "settings" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+        } else {
+            showToast('Error saving preferences: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error saving preferences', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Export data function
+function exportData(format) {
+    showToast(`Exporting data as ${format.toUpperCase()}...`, 'info');
+    // In a real app, this would trigger an actual export
+    setTimeout(() => {
+        showToast(`Data exported as ${format.toUpperCase()} successfully!`, 'success');
+    }, 2000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,546 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions - Finance App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Transaction History</h1>
+                    <p class="text-muted">View and manage your financial transactions</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickTransactionModal">
+                        <i class="fas fa-plus"></i> Add Transaction
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-filter"></i> Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="accountFilter" class="form-label">Account</label>
+                        <select class="form-select" id="accountFilter" name="account">
+                            <option value="">All Accounts</option>
+                            {% for account in user_accounts %}
+                            <option value="{{ account.id }}" 
+                                {% if current_filters.account == account.id|stringformat:"s" %}selected{% endif %}>
+                                {{ account.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter" name="status">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if current_filters.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if current_filters.status == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="completed" {% if current_filters.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="failed" {% if current_filters.status == 'failed' %}selected{% endif %}>Failed</option>
+                            <option value="cancelled" {% if current_filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="typeFilter" class="form-label">Type</label>
+                        <select class="form-select" id="typeFilter" name="type">
+                            <option value="">All Types</option>
+                            <option value="credit" {% if current_filters.type == 'credit' %}selected{% endif %}>Income (Credit)</option>
+                            <option value="debit" {% if current_filters.type == 'debit' %}selected{% endif %}>Expense (Debit)</option>
+                            <option value="transfer" {% if current_filters.type == 'transfer' %}selected{% endif %}>Transfer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="searchFilter" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchFilter" name="search" 
+                               placeholder="Description or reference number..." 
+                               value="{{ current_filters.search }}">
+                    </div>
+                    
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Transactions</h5>
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-primary" onclick="exportTransactions('csv')">
+                    <i class="fas fa-download"></i> CSV
+                </button>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportTransactions('pdf')">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Reference</th>
+                            <th>Description</th>
+                            <th>Account</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr class="transaction-row">
+                            <td>
+                                <div class="fw-medium">{{ transaction.transaction_date|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ transaction.transaction_date|date:"g:i A" }}</small>
+                            </td>
+                            <td>
+                                <span class="font-monospace text-muted">{{ transaction.reference_number }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-medium">{{ transaction.description }}</div>
+                                {% if transaction.to_account %}
+                                <small class="text-muted">
+                                    <i class="fas fa-arrow-right"></i> {{ transaction.to_account.name }}
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ transaction.account.name }}</div>
+                                <small class="text-muted">{{ transaction.account.get_account_type_display }}</small>
+                            </td>
+                            <td>
+                                {% if transaction.category %}
+                                <span class="badge" style="background-color: {{ transaction.category.color }};">
+                                    {{ transaction.category.name }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold {% if transaction.transaction_type == 'credit' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if transaction.transaction_type == 'credit' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                                </div>
+                                <small class="text-muted">{{ transaction.get_transaction_type_display }}</small>
+                            </td>
+                            <td>
+                                {% if transaction.status == 'completed' %}
+                                <span class="badge bg-success">{{ transaction.get_status_display }}</span>
+                                {% elif transaction.status == 'pending' %}
+                                <span class="badge bg-warning">{{ transaction.get_status_display }}</span>
+                                {% elif transaction.status == 'processing' %}
+                                <span class="badge bg-info">{{ transaction.get_status_display }}</span>
+                                {% elif transaction.status == 'failed' %}
+                                <span class="badge bg-danger">{{ transaction.get_status_display }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-primary" 
+                                            onclick="viewTransaction('{{ transaction.id }}')"
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if transaction.status == 'pending' %}
+                                    <button class="btn btn-outline-success" 
+                                            onclick="completeTransaction('{{ transaction.id }}')"
+                                            title="Complete Transaction">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" 
+                                            onclick="cancelTransaction('{{ transaction.id }}')"
+                                            title="Cancel Transaction">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if transactions.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Transaction pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if transactions.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if current_filters.account %}account={{ current_filters.account }}&{% endif %}{% if current_filters.status %}status={{ current_filters.status }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}page={{ transactions.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in transactions.paginator.page_range %}
+                        {% if transactions.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > transactions.number|add:'-3' and num < transactions.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if current_filters.account %}account={{ current_filters.account }}&{% endif %}{% if current_filters.status %}status={{ current_filters.status }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if transactions.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if current_filters.account %}account={{ current_filters.account }}&{% endif %}{% if current_filters.status %}status={{ current_filters.status }}&{% endif %}{% if current_filters.type %}type={{ current_filters.type }}&{% endif %}{% if current_filters.search %}search={{ current_filters.search }}&{% endif %}page={{ transactions.next_page_number }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-receipt fa-5x text-muted mb-3"></i>
+                <h4>No Transactions Found</h4>
+                <p class="text-muted">
+                    {% if current_filters.search or current_filters.account or current_filters.status or current_filters.type %}
+                    No transactions match your current filters. Try adjusting your search criteria.
+                    {% else %}
+                    You haven't made any transactions yet. Get started by creating your first transaction.
+                    {% endif %}
+                </p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickTransactionModal">
+                    <i class="fas fa-plus"></i> Create Transaction
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Transaction Modal -->
+<div class="modal fade" id="quickTransactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickTransactionForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="account" class="form-label">Account</label>
+                        <select class="form-select" id="account" name="account_id" required>
+                            {% for account in user_accounts %}
+                            <option value="{{ account.id }}">{{ account.name }} (${{ account.get_balance|floatformat:2 }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transaction_type" class="form-label">Type</label>
+                        <select class="form-select" id="transaction_type" name="transaction_type" required>
+                            <option value="debit">Expense (Debit)</option>
+                            <option value="credit">Income (Credit)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transaction Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="transactionDetailsContent">
+                <!-- Transaction details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Handle transaction form submission
+document.getElementById('quickTransactionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        account_id: document.getElementById('account').value,
+        amount: document.getElementById('amount').value,
+        description: document.getElementById('description').value,
+        transaction_type: document.getElementById('transaction_type').value
+    };
+    
+    fetch('{% url "quick_transaction" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Transaction created successfully!', 'success');
+            document.getElementById('quickTransactionModal').querySelector('.btn-close').click();
+            document.getElementById('quickTransactionForm').reset();
+            location.reload(); // Refresh to show new transaction
+        } else {
+            showToast('Error: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showToast('Error creating transaction', 'error');
+    });
+});
+
+function viewTransaction(transactionId) {
+    // Placeholder for transaction details view
+    document.getElementById('transactionDetailsContent').innerHTML = 
+        '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading transaction details...</div>';
+    
+    const modal = new bootstrap.Modal(document.getElementById('transactionDetailsModal'));
+    const content = document.getElementById('transactionDetailsContent');
+    
+    // Show loading state
+    content.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Loading transaction details...</p></div>';
+    modal.show();
+    
+    // Fetch transaction details via AJAX
+    fetch(`/ajax/transaction-detail/${transactionId}/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const txn = data.transaction;
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Basic Information</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td class="fw-medium">Reference:</td>
+                                <td class="font-monospace">${txn.reference_number}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Description:</td>
+                                <td>${txn.description}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Amount:</td>
+                                <td class="fw-bold ${txn.transaction_type === 'Credit' ? 'text-success' : 'text-danger'}">
+                                    ${txn.transaction_type === 'Credit' ? '+' : '-'}$${parseFloat(txn.amount).toFixed(2)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Type:</td>
+                                <td>${txn.transaction_type}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Status:</td>
+                                <td><span class="badge bg-success">${txn.status}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Account & Category</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td class="fw-medium">Account:</td>
+                                <td>
+                                    ${txn.account.name}<br>
+                                    <small class="text-muted">${txn.account.type} • ${txn.account.number}</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Category:</td>
+                                <td>
+                                    <span class="badge" style="background-color: ${txn.category.color};">${txn.category.name}</span>
+                                </td>
+                            </tr>
+                            ${txn.to_account ? `
+                            <tr>
+                                <td class="fw-medium">To Account:</td>
+                                <td>
+                                    ${txn.to_account.name}<br>
+                                    <small class="text-muted">${txn.to_account.type}</small>
+                                </td>
+                            </tr>
+                            ` : ''}
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-2">Dates & Notes</h6>
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td class="fw-medium" style="width: 150px;">Transaction Date:</td>
+                                <td>${txn.transaction_date}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Created:</td>
+                                <td>${txn.created_at}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-medium">Notes:</td>
+                                <td>${txn.notes}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = '<div class="alert alert-danger">Failed to load transaction details. Please try again.</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        content.innerHTML = '<div class="alert alert-danger">An error occurred while loading transaction details.</div>';
+    });
+}
+
+function completeTransaction(transactionId) {
+    if (confirm('Are you sure you want to complete this transaction?')) {
+        fetch(`/ajax/transaction-complete/${transactionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                // Refresh the page to show updated status
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.error || 'Failed to complete transaction', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while completing the transaction', 'error');
+        });
+    }
+}
+
+function cancelTransaction(transactionId) {
+    if (confirm('Are you sure you want to cancel this transaction?')) {
+        fetch(`/ajax/transaction-cancel/${transactionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                // Refresh the page to show updated status
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.error || 'Failed to cancel transaction', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred while cancelling the transaction', 'error');
+        });
+    }
+}
+
+function exportTransactions(format) {
+    if (format === 'csv') {
+        // Create a temporary link to download the CSV
+        const link = document.createElement('a');
+        link.href = `/export/transactions/?format=csv`;
+        link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('CSV export started. Check your downloads folder.', 'success');
+    } else if (format === 'pdf') {
+        fetch(`/export/transactions/?format=pdf`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast(data.error, 'info');
+            }
+        })
+        .catch(error => {
+            showToast('PDF export is not yet available. Please use CSV format.', 'info');
+        });
+    } else {
+        showToast('Invalid export format', 'error');
+    }
+}
+
+// Auto-submit filters when changed
+document.querySelectorAll('#filterForm select').forEach(select => {
+    select.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+});
+</script>
+{% endblock %}

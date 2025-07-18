@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Finance App</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .register-container {
+            max-width: 450px;
+            width: 100%;
+        }
+        .register-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .register-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 30px;
+            text-align: center;
+        }
+        .register-body {
+            padding: 30px;
+        }
+        .form-floating .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dee2e6;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #6c757d;
+        }
+        .password-requirements {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        .requirement {
+            color: #dc3545;
+            margin-bottom: 5px;
+        }
+        .requirement.valid {
+            color: #28a745;
+        }
+        .requirement i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="register-container">
+                    <div class="card register-card">
+                        <div class="register-header">
+                            <h3 class="mb-0">
+                                <i class="fas fa-wallet"></i> Finance App
+                            </h3>
+                            <p class="mb-0 mt-2">Create your account</p>
+                        </div>
+                        <div class="register-body">
+                            <!-- Display Messages -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <form method="post" id="registerForm">
+                                {% csrf_token %}
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="id_username" name="username" 
+                                           placeholder="Username" required>
+                                    <label for="id_username">
+                                        <i class="fas fa-user"></i> Username
+                                    </label>
+                                    {% if form.username.errors %}
+                                        <div class="text-danger mt-1">
+                                            {{ form.username.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           placeholder="Email" required>
+                                    <label for="email">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </label>
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="password" class="form-control" id="id_password1" name="password1" 
+                                           placeholder="Password" required>
+                                    <label for="id_password1">
+                                        <i class="fas fa-lock"></i> Password
+                                    </label>
+                                    {% if form.password1.errors %}
+                                        <div class="text-danger mt-1">
+                                            {{ form.password1.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-floating mb-3">
+                                    <input type="password" class="form-control" id="id_password2" name="password2" 
+                                           placeholder="Confirm Password" required>
+                                    <label for="id_password2">
+                                        <i class="fas fa-lock"></i> Confirm Password
+                                    </label>
+                                    {% if form.password2.errors %}
+                                        <div class="text-danger mt-1">
+                                            {{ form.password2.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Password Requirements -->
+                                <div class="password-requirements">
+                                    <h6 class="mb-2"><i class="fas fa-info-circle"></i> Password Requirements</h6>
+                                    <div class="requirement" id="length">
+                                        <i class="fas fa-times"></i> At least 8 characters
+                                    </div>
+                                    <div class="requirement" id="match">
+                                        <i class="fas fa-times"></i> Passwords match
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-register btn-success">
+                                        <i class="fas fa-user-plus"></i> Create Account
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="divider">
+                                <span>or</span>
+                            </div>
+                            
+                            <div class="text-center">
+                                <p class="mb-0">Already have an account?</p>
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In
+                                </a>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="{% url 'landing' %}" class="btn btn-link">
+                                    <i class="fas fa-arrow-left"></i> Back to Home
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const password1 = document.getElementById('id_password1');
+        const password2 = document.getElementById('id_password2');
+        const lengthReq = document.getElementById('length');
+        const matchReq = document.getElementById('match');
+        
+        function checkRequirements() {
+            // Check password length
+            if (password1.value.length >= 8) {
+                lengthReq.classList.add('valid');
+                lengthReq.innerHTML = '<i class="fas fa-check"></i> At least 8 characters';
+            } else {
+                lengthReq.classList.remove('valid');
+                lengthReq.innerHTML = '<i class="fas fa-times"></i> At least 8 characters';
+            }
+            
+            // Check password match
+            if (password1.value && password2.value && password1.value === password2.value) {
+                matchReq.classList.add('valid');
+                matchReq.innerHTML = '<i class="fas fa-check"></i> Passwords match';
+            } else {
+                matchReq.classList.remove('valid');
+                matchReq.innerHTML = '<i class="fas fa-times"></i> Passwords match';
+            }
+        }
+        
+        password1.addEventListener('input', checkRequirements);
+        password2.addEventListener('input', checkRequirements);
+        
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const submitBtn = document.querySelector('.btn-register');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Finance App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Analytics Dashboard</h1>
+                    <p class="text-muted">Track your spending patterns and financial insights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card primary">
+                <div class="stats-icon primary">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h3 class="mb-0">${{ total_balance|floatformat:2 }}</h3>
+                <p class="text-muted mb-0">Total Balance</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card success">
+                <div class="stats-icon success">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h3 class="mb-0">{{ total_transactions }}</h3>
+                <p class="text-muted mb-0">Total Transactions</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card info">
+                <div class="stats-icon info">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h3 class="mb-0">{{ accounts.count }}</h3>
+                <p class="text-muted mb-0">Active Accounts</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Monthly Income vs Spending</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Spending by Category</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Performance -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Account Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Type</th>
+                                    <th>Balance</th>
+                                    <th>Transactions</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in accounts %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ account.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ account.account_number }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ account.get_account_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="{% if account.get_balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                            ${{ account.get_balance|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>{{ account.get_transaction_count }}</td>
+                                    <td>
+                                        {% if account.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No accounts found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Monthly Income vs Spending Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyData = {{ monthly_data|safe }};
+const monthlyChart = new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: monthlyData.map(d => d.month),
+        datasets: [{
+            label: 'Income',
+            data: monthlyData.map(d => d.income),
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.1
+        }, {
+            label: 'Spending',
+            data: monthlyData.map(d => d.spending),
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '$' + value.toFixed(2);
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        }
+    }
+});
+
+// Category Spending Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryData = {{ category_spending|safe }};
+
+// Check if we have data, if not create sample data
+let chartData = categoryData;
+if (!categoryData || Object.keys(categoryData).length === 0) {
+    chartData = {
+        'Food & Dining': 310,
+        'Transportation': 115,
+        'Shopping': 50,
+        'Entertainment': 25
+    };
+}
+
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(chartData),
+        datasets: [{
+            data: Object.values(chartData),
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': $' + context.parsed.toFixed(2);
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Finance App{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --sidebar-bg: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Light Theme Variables */
+        [data-theme="light"] {
+            --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #888888;
+            --border-color: #dee2e6;
+            --sidebar-bg: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            --sidebar-text: #ffffff;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #dee2e6;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --border-color: #4d4d4d;
+            --sidebar-bg: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            --sidebar-text: #ffffff;
+            --card-bg: #3d3d3d;
+            --input-bg: #2d2d2d;
+            --input-border: #4d4d4d;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Auto Theme (System Preference) */
+        [data-theme="auto"] {
+            --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #888888;
+            --border-color: #dee2e6;
+            --sidebar-bg: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            --sidebar-text: #ffffff;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #dee2e6;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Auto Theme Dark Mode (System Preference) */
+        @media (prefers-color-scheme: dark) {
+            [data-theme="auto"] {
+                --bg-primary: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                --bg-secondary: #2d2d2d;
+                --bg-tertiary: #3d3d3d;
+                --text-primary: #ffffff;
+                --text-secondary: #cccccc;
+                --text-muted: #888888;
+                --border-color: #4d4d4d;
+                --sidebar-bg: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+                --sidebar-text: #ffffff;
+                --card-bg: #3d3d3d;
+                --input-bg: #2d2d2d;
+                --input-border: #4d4d4d;
+                --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar {
+            height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            width: 280px;
+            overflow-y: auto;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 40px 25px 30px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        /* Enhanced header visibility for light mode */
+        [data-theme="light"] .sidebar-header {
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="auto"] .sidebar-header {
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Even stronger background for light mode readability */
+        [data-theme="light"] .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .sidebar-header h4 {
+            color: #ffffff !important;
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            text-shadow: 
+                0 0 10px rgba(0, 0, 0, 0.8),
+                0 2px 8px rgba(0, 0, 0, 0.6),
+                0 1px 4px rgba(0, 0, 0, 0.4),
+                2px 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Text stroke for all themes for consistent visual weight */
+        [data-theme="light"] .sidebar-header h4 {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+            text-stroke: 1px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .sidebar-header h4 {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.3);
+            text-stroke: 1px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="auto"] .sidebar-header h4 {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+            text-stroke: 1px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="auto"] .sidebar-header h4 {
+                -webkit-text-stroke: 1px rgba(0, 0, 0, 0.3);
+                text-stroke: 1px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .sidebar-header h4 i {
+            margin-right: 12px;
+            font-size: 1.8rem;
+            color: #ffffff !important;
+            text-shadow: 
+                0 0 10px rgba(0, 0, 0, 0.8),
+                0 2px 8px rgba(0, 0, 0, 0.6),
+                0 1px 4px rgba(0, 0, 0, 0.4),
+                2px 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Icon stroke for all themes for consistency */
+        [data-theme="light"] .sidebar-header h4 i {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+            text-stroke: 1px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6));
+        }
+
+        [data-theme="dark"] .sidebar-header h4 i {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.3);
+            text-stroke: 1px rgba(0, 0, 0, 0.3);
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6));
+        }
+
+        [data-theme="auto"] .sidebar-header h4 i {
+            -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+            text-stroke: 1px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6));
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="auto"] .sidebar-header h4 i {
+                -webkit-text-stroke: 1px rgba(0, 0, 0, 0.3);
+                text-stroke: 1px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-pills .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 0;
+            padding: 15px 25px;
+            margin: 2px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-pills .nav-link:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-pills .nav-link:hover:before,
+        .nav-pills .nav-link.active:before {
+            left: 0;
+        }
+
+        .nav-pills .nav-link:hover,
+        .nav-pills .nav-link.active {
+            color: white;
+            background: transparent;
+            transform: translateX(5px);
+        }
+
+        .nav-pills .nav-link i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 25px 25px 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 10px 0;
+            border-radius: 8px;
+            margin: 0;
+        }
+
+        .user-dropdown .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: none;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--card-shadow);
+            border-radius: 12px;
+            padding: 10px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            min-height: 100vh;
+            background: transparent;
+        }
+
+        .account-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            background: var(--card-bg);
+            overflow: hidden;
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .account-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .account-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0 !important;
+            padding: 20px 25px;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-info {
+            background: var(--info-gradient);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        /* Form inputs */
+        .form-control, .form-select {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--input-bg) !important;
+            border-color: #667eea !important;
+            color: var(--text-primary) !important;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        /* Form labels */
+        .form-label {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+        }
+
+        /* Modal form elements specific styling */
+        .modal .form-control,
+        .modal .form-select {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .modal .form-label {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Override Bootstrap's text-muted class to use theme variables */
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Override Bootstrap table classes for theme support */
+        .table {
+            color: var(--text-primary) !important;
+            background-color: var(--card-bg) !important;
+        }
+
+        .table th {
+            color: var(--text-secondary) !important;
+            border-bottom: 2px solid var(--border-color) !important;
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .table td {
+            color: var(--text-primary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            background-color: var(--card-bg) !important;
+        }
+
+        .table tbody tr {
+            background-color: var(--card-bg) !important;
+        }
+
+        .table tbody td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .table-hover tbody tr:hover td {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        /* Ensure table content is readable */
+        .table tbody td strong {
+            color: var(--text-primary) !important;
+        }
+
+        .table-responsive {
+            background-color: var(--card-bg) !important;
+        }
+
+        /* More specific table overrides */
+        .card .table-responsive .table {
+            background-color: var(--card-bg) !important;
+        }
+
+        .card .table-responsive .table tbody tr {
+            background-color: var(--card-bg) !important;
+        }
+
+        .card .table-responsive .table tbody td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Additional Bootstrap table overrides for dark mode */
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .table-bordered {
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid var(--border-color) !important;
+        }
+
+        /* Override Bootstrap table-light class for dark mode */
+        .table-light {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .table-light th {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        /* Transaction specific styling */
+        .transaction-row {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .transaction-row td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .transaction-row:hover {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .transaction-row:hover td {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        /* Very specific table overrides to force Bootstrap compliance */
+        .card-body .table-responsive .table.table-hover.mb-0 {
+            background-color: var(--card-bg) !important;
+        }
+
+        .card-body .table-responsive .table.table-hover.mb-0 tbody tr {
+            background-color: var(--card-bg) !important;
+        }
+
+        .card-body .table-responsive .table.table-hover.mb-0 tbody td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .card-body .table-responsive .table.table-hover.mb-0 thead.table-light {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .card-body .table-responsive .table.table-hover.mb-0 thead.table-light th {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        /* Text success and danger overrides for better contrast */
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        /* Button group styling in tables */
+        .btn-group-sm .btn {
+            border-color: var(--border-color);
+        }
+
+        .btn-outline-primary {
+            border-color: #667eea !important;
+            color: #667eea !important;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #667eea !important;
+            color: white !important;
+        }
+
+        .btn-outline-success {
+            border-color: #28a745 !important;
+            color: #28a745 !important;
+        }
+
+        .btn-outline-success:hover {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+
+        .btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .btn-outline-secondary {
+            border-color: #6c757d !important;
+            color: #6c757d !important;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d !important;
+            color: white !important;
+        }
+
+        /* Font weight classes with proper colors */
+        .fw-medium,
+        .fw-bold {
+            color: var(--text-primary) !important;
+        }
+
+        /* Table specific text elements */
+        .table td div,
+        .table th div {
+            color: var(--text-primary) !important;
+        }
+
+        .table td .fw-medium,
+        .table td .fw-bold {
+            color: var(--text-primary) !important;
+        }
+
+        /* Date and time text in tables */
+        .table td small,
+        .table th small {
+            color: var(--text-muted) !important;
+        }
+
+        /* Ultra-aggressive text color overrides for tables */
+        .table td,
+        .table th,
+        .table td *,
+        .table th *,
+        .table tbody td,
+        .table tbody th,
+        .table tbody td *,
+        .table tbody th * {
+            color: var(--text-primary) !important;
+        }
+
+        /* Small text and muted text in tables */
+        .table td small,
+        .table th small,
+        .table td .text-muted,
+        .table th .text-muted,
+        .table td .font-monospace,
+        .table th .font-monospace {
+            color: var(--text-muted) !important;
+        }
+
+        /* Specific overrides for transaction table structure */
+        .transaction-row td,
+        .transaction-row th,
+        .transaction-row td div,
+        .transaction-row th div,
+        .transaction-row td span,
+        .transaction-row th span {
+            color: var(--text-primary) !important;
+        }
+
+        /* Override any Bootstrap text color classes in tables */
+        .table .text-dark,
+        .table .text-black,
+        .table .text-secondary {
+            color: var(--text-primary) !important;
+        }
+
+        /* Force all text content in table cells to be readable */
+        .table tbody tr td,
+        .table tbody tr th {
+            color: var(--text-primary) !important;
+        }
+
+        .table tbody tr td div,
+        .table tbody tr th div,
+        .table tbody tr td span,
+        .table tbody tr th span {
+            color: var(--text-primary) !important;
+        }
+
+        /* Transaction table specific elements */
+        .table .fw-medium {
+            color: var(--text-primary) !important;
+        }
+
+        .table .fw-bold {
+            color: var(--text-primary) !important;
+        }
+
+        /* Very specific selectors for common table elements */
+        .card-body .table tbody tr td div.fw-medium,
+        .card-body .table tbody tr td span.font-monospace,
+        .card-body .table tbody tr td div,
+        .card-body .table tbody tr td span {
+            color: var(--text-primary) !important;
+        }
+
+        /* Override Bootstrap default text colors in all scenarios */
+        .table * {
+            color: var(--text-primary) !important;
+        }
+
+        /* Exception for muted text elements */
+        .table .text-muted,
+        .table small,
+        .table .font-monospace.text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Dark theme specific overrides */
+        [data-theme="dark"] .table,
+        [data-theme="dark"] .table td,
+        [data-theme="dark"] .table th,
+        [data-theme="dark"] .table td *,
+        [data-theme="dark"] .table th *,
+        [data-theme="dark"] .table tbody td,
+        [data-theme="dark"] .table tbody th,
+        [data-theme="dark"] .table tbody td *,
+        [data-theme="dark"] .table tbody th * {
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] .table .text-muted,
+        [data-theme="dark"] .table small,
+        [data-theme="dark"] .table .font-monospace.text-muted {
+            color: #888888 !important;
+        }
+
+        /* Auto theme dark mode overrides */
+        @media (prefers-color-scheme: dark) {
+            [data-theme="auto"] .table,
+            [data-theme="auto"] .table td,
+            [data-theme="auto"] .table th,
+            [data-theme="auto"] .table td *,
+            [data-theme="auto"] .table th *,
+            [data-theme="auto"] .table tbody td,
+            [data-theme="auto"] .table tbody th,
+            [data-theme="auto"] .table tbody td *,
+            [data-theme="auto"] .table tbody th * {
+                color: #ffffff !important;
+            }
+
+            [data-theme="auto"] .table .text-muted,
+            [data-theme="auto"] .table small,
+            [data-theme="auto"] .table .font-monospace.text-muted {
+                color: #888888 !important;
+            }
+        }
+
+        /* Chart.js text color fixes for dark mode */
+        [data-theme="dark"] canvas {
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] .card-body {
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .card-body * {
+            color: #ffffff !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            [data-theme="auto"] canvas {
+                color-scheme: dark;
+            }
+
+            [data-theme="auto"] .card-body {
+                color: #ffffff;
+            }
+
+            [data-theme="auto"] .card-body * {
+                color: #ffffff !important;
+            }
+        }
+
+        /* Card footer for pagination */
+        .card-footer {
+            background-color: var(--bg-tertiary) !important;
+            border-top: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Pagination styling for dark mode */
+        .pagination .page-link {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #667eea !important;
+            border-color: #667eea !important;
+            color: white !important;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-muted) !important;
+        }
+
+        /* Override Bootstrap badge classes for better theme support */
+        .badge {
+            color: white !important;
+            font-weight: 600 !important;
+        }
+
+        .badge.bg-secondary {
+            background-color: #6c757d !important;
+        }
+
+        .badge.bg-success {
+            background-color: #198754 !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        /* Override Bootstrap card title colors */
+        .card-title {
+            color: var(--text-primary) !important;
+        }
+
+        /* Override Bootstrap small text */
+        small {
+            color: var(--text-secondary);
+        }
+
+        /* Override Bootstrap heading colors */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Override Bootstrap text utilities for better contrast */
+        .text-center {
+            color: var(--text-primary);
+        }
+
+        /* Override Bootstrap font-monospace for better theme support */
+        .font-monospace {
+            color: var(--text-secondary);
+        }
+
+        /* Bootstrap Modal dark mode styling */
+        .modal-content {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .modal-header {
+            background-color: var(--bg-tertiary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        .modal-title {
+            color: var(--text-primary) !important;
+        }
+
+        .modal-body {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .modal-footer {
+            background-color: var(--bg-tertiary) !important;
+            border-top: 1px solid var(--border-color) !important;
+        }
+
+        /* Modal backdrop for dark mode */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        /* Bootstrap close button for dark mode */
+        .btn-close {
+            filter: var(--text-primary) == #ffffff ? invert(1) : none;
+        }
+
+        [data-theme="dark"] .btn-close {
+            filter: invert(1);
+        }
+
+        /* Modal button styling for dark mode */
+        .modal-footer .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+        }
+
+        .modal-footer .btn-secondary:hover {
+            background-color: #5a6268 !important;
+            border-color: #545b62 !important;
+        }
+
+        /* Toast styling for dark mode */
+        .toast {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .toast-header {
+            background-color: var(--bg-tertiary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .toast-body {
+            color: var(--text-primary) !important;
+        }
+
+        .transaction-row {
+            border-left: 4px solid transparent;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        .transaction-row:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+
+        .transaction-row.credit:before {
+            background: var(--success-gradient);
+        }
+
+        .transaction-row.debit:before {
+            background: var(--warning-gradient);
+        }
+
+        .transaction-row:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-row:hover:before {
+            width: 8px;
+        }
+
+        .balance-positive {
+            color: #11998e !important;
+            font-weight: 600;
+        }
+
+        .balance-negative {
+            color: #f5576c !important;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1050;
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        .stats-card h3,
+        .stats-card h1,
+        .stats-card h2,
+        .stats-card h4,
+        .stats-card h5,
+        .stats-card h6 {
+            color: var(--text-primary) !important;
+        }
+
+        .stats-card .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Bootstrap colored cards should maintain white text */
+        .card.bg-primary,
+        .card.bg-success,
+        .card.bg-info,
+        .card.bg-warning,
+        .card.bg-danger {
+            color: white !important;
+        }
+
+        .card.bg-primary h1,
+        .card.bg-primary h2,
+        .card.bg-primary h3,
+        .card.bg-primary h4,
+        .card.bg-primary h5,
+        .card.bg-primary h6,
+        .card.bg-success h1,
+        .card.bg-success h2,
+        .card.bg-success h3,
+        .card.bg-success h4,
+        .card.bg-success h5,
+        .card.bg-success h6,
+        .card.bg-info h1,
+        .card.bg-info h2,
+        .card.bg-info h3,
+        .card.bg-info h4,
+        .card.bg-info h5,
+        .card.bg-info h6,
+        .card.bg-warning h1,
+        .card.bg-warning h2,
+        .card.bg-warning h3,
+        .card.bg-warning h4,
+        .card.bg-warning h5,
+        .card.bg-warning h6,
+        .card.bg-danger h1,
+        .card.bg-danger h2,
+        .card.bg-danger h3,
+        .card.bg-danger h4,
+        .card.bg-danger h5,
+        .card.bg-danger h6 {
+            color: white !important;
+        }
+
+        .stats-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stats-card.primary:before {
+            background: var(--primary-gradient);
+        }
+
+        .stats-card.success:before {
+            background: var(--success-gradient);
+        }
+
+        .stats-card.info:before {
+            background: var(--info-gradient);
+        }
+
+        .stats-card.warning:before {
+            background: var(--warning-gradient);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .stats-icon.primary {
+            background: var(--primary-gradient);
+        }
+
+        .stats-icon.success {
+            background: var(--success-gradient);
+        }
+
+        .stats-icon.info {
+            background: var(--info-gradient);
+        }
+
+        .stats-icon.warning {
+            background: var(--warning-gradient);
+        }
+
+        .page-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                overflow-y: visible;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar-footer {
+                position: static;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h4>
+                <i class="fas fa-wallet"></i> Finance App
+            </h4>
+        </div>
+        
+        <div class="sidebar-nav">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'account_list' %}" class="nav-link {% if 'account' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-university"></i> Accounts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'transaction_list' %}" class="nav-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-exchange-alt"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'settings' %}" class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'admin:index' %}" class="nav-link">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="toggleTheme()" id="themeToggle">
+                        <i class="fas fa-moon"></i> <span id="themeText">Dark Mode</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-dropdown">
+                <div class="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                        <div class="d-flex align-items-center w-100">
+                            <div class="stats-icon primary me-3" style="width: 40px; height: 40px; margin-bottom: 0;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="text-white fw-medium">{{ user.first_name|default:user.username }}</div>
+                                <small class="text-white-50">{{ user.email }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user-edit"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a></li>
+                        <li><a class="dropdown-item" href="{% url 'notifications' %}"><i class="fas fa-bell"></i> Notifications</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-message"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Theme Management
+        let currentTheme = '{{ preferences.theme|default:"light" }}';
+        
+        function initializeTheme() {
+            // Check if there's a saved theme preference in localStorage
+            const savedTheme = localStorage.getItem('theme');
+            const userPreferredTheme = '{{ preferences.theme|default:"light" }}';
+            
+            // Use saved theme if available, otherwise use user preference from database
+            const themeToApply = savedTheme || userPreferredTheme;
+            applyTheme(themeToApply);
+            updateThemeToggle();
+        }
+        
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            currentTheme = theme;
+        }
+        
+        function previewTheme(theme) {
+            applyTheme(theme);
+            updateThemeToggle();
+        }
+        
+        function toggleTheme() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            updateThemeToggle();
+            
+            // Immediately save to localStorage for instant persistence across pages
+            localStorage.setItem('theme', newTheme);
+            
+            // Also save theme preference to backend for persistence across devices/sessions
+            if (typeof getCookie === 'function') {
+                fetch('{% url "settings" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: `update_preferences=1&theme=${newTheme}&default_currency={{ preferences.default_currency|default:'USD' }}&date_format={{ preferences.date_format|default:'MM/DD/YYYY' }}&language={{ preferences.language|default:'en' }}&email_notifications={{ preferences.email_notifications|yesno:'on,off' }}&low_balance_alerts={{ preferences.low_balance_alerts|yesno:'on,off' }}`
+                }).catch(error => console.error('Error saving theme to backend:', error));
+            }
+        }
+        
+        function updateThemeToggle() {
+            const toggleIcon = document.querySelector('#themeToggle i');
+            const toggleText = document.querySelector('#themeText');
+            
+            if (currentTheme === 'light') {
+                toggleIcon.className = 'fas fa-moon';
+                toggleText.textContent = 'Dark Mode';
+            } else {
+                toggleIcon.className = 'fas fa-sun';
+                toggleText.textContent = 'Light Mode';
+            }
+        }
+        
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+        });
+        
+        // Global JavaScript functions
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = toast.querySelector('.toast-header i');
+            
+            toastMessage.textContent = message;
+            
+            // Update icon and color based on type
+            toastIcon.className = `fas fa-${type === 'success' ? 'check-circle text-success' : 
+                                           type === 'error' ? 'exclamation-triangle text-danger' : 
+                                           'info-circle text-primary'}`;
+            
+            const bootstrapToast = new bootstrap.Toast(toast);
+            bootstrapToast.show();
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+        
+        function showLoading(element) {
+            element.classList.add('loading');
+            element.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        }
+        
+        function hideLoading(element, originalText) {
+            element.classList.remove('loading');
+            element.innerHTML = originalText;
+        }
+        
+        // CSRF token setup for AJAX
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        
+        // Set CSRF token for all AJAX requests
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
