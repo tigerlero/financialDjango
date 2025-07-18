@@ -1,4 +1,4 @@
-
+# Finance Management Application
 A comprehensive Django-based personal finance management system with modern UI, real-time analytics, and robust financial tracking capabilities.
 
 ## 📸 Application Screenshots
@@ -6,7 +6,6 @@ A comprehensive Django-based personal finance management system with modern UI, 
 ### Dashboard Overview
 <img width="1884" height="885" alt="image" src="https://github.com/user-attachments/assets/85ed6a08-b1f5-4b81-aea8-03daf772a9e0" />
 <img width="1596" height="510" alt="image" src="https://github.com/user-attachments/assets/af97a637-1e7c-4978-ae5b-3dfd9bb43c10" />
-<img width="1436" height="423" alt="image" src="https://github.com/user-attachments/assets/ce1a1227-3342-40fb-a849-86e921bc92a9" /># Finance Management Application
 
 
 *Main dashboard showing account balances, recent transactions, and quick actions*
