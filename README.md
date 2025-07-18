@@ -1,4 +1,4 @@
-# Finance Management Application
+<img width="1436" height="423" alt="image" src="https://github.com/user-attachments/assets/ce1a1227-3342-40fb-a849-86e921bc92a9" /># Finance Management Application
 
 A comprehensive Django-based personal finance management system with modern UI, real-time analytics, and robust financial tracking capabilities.
 
@@ -6,52 +6,57 @@ A comprehensive Django-based personal finance management system with modern UI, 
 
 ### Dashboard Overview
 <img width="1884" height="885" alt="image" src="https://github.com/user-attachments/assets/85ed6a08-b1f5-4b81-aea8-03daf772a9e0" />
+<img width="1596" height="510" alt="image" src="https://github.com/user-attachments/assets/af97a637-1e7c-4978-ae5b-3dfd9bb43c10" />
+
 
 *Main dashboard showing account balances, recent transactions, and quick actions*
 
 ### Transaction Management
-![Transaction List](screenshots/transactions-list.png)
+<img width="1856" height="873" alt="image" src="https://github.com/user-attachments/assets/f1242298-43d6-4f62-af71-6e2f2210be33" />
+
 *Transaction listing with filtering and search capabilities*
 
-![Add Transaction](screenshots/add-transaction.png)
+<img width="536" height="539" alt="image" src="https://github.com/user-attachments/assets/41e29121-a977-4eff-9aee-4d7e076524f0" />
+
 *Transaction creation form with category selection and validation*
 
 ### Analytics & Reports
-![Analytics Dashboard](screenshots/analytics.png)
-*Interactive charts showing spending patterns and financial trends*
-
-![Monthly Reports](screenshots/monthly-reports.png)
-*Detailed monthly financial reports with category breakdowns*
+<img width="1601" height="767" alt="image" src="https://github.com/user-attachments/assets/324214fa-cdcf-4ec4-8868-1e960e6d6121" />
+<img width="1570" height="402" alt="image" src="https://github.com/user-attachments/assets/8090b2d9-0203-4546-a0ff-f384c7eb63d5" />
 
 ### Account Management
-![Account Overview](screenshots/accounts.png)
+<img width="1877" height="876" alt="image" src="https://github.com/user-attachments/assets/f8c4b5c6-2777-4890-82af-f3bf0c8c1181" />
+
 *Account management interface showing multiple account types*
 
-![Account Details](screenshots/account-details.png)
+<img width="1592" height="894" alt="image" src="https://github.com/user-attachments/assets/615ba628-7819-47ee-878b-52285aa2f0f2" />
+
 *Individual account view with transaction history*
 
 ### Admin Interface
-![Admin Dashboard](screenshots/admin-dashboard.png)
-*Enhanced admin dashboard with system statistics and quick actions*
+<img width="1875" height="782" alt="image" src="https://github.com/user-attachments/assets/57334096-5c58-4b85-a394-88bb9b5bf14e" />
 
-![Admin Transaction Management](screenshots/admin-transactions.png)
+*Enhanced admin dashboard with system statistics and quick actions*
+<img width="1551" height="756" alt="image" src="https://github.com/user-attachments/assets/3c831e19-58f4-4750-b9e7-9f9f546c252d" />
+<img width="1436" height="423" alt="image" src="https://github.com/user-attachments/assets/266aea28-f200-4c2e-b1a5-5704159081fe" />
+
 *Admin interface for managing transactions and user data*
 
 ### Mobile Responsive Design
 <div style="display: flex; gap: 20px;">
-  <img src="screenshots/mobile-dashboard.png" alt="Mobile Dashboard" width="300">
-  <img src="screenshots/mobile-transactions.png" alt="Mobile Transactions" width="300">
-  <img src="screenshots/mobile-analytics.png" alt="Mobile Analytics" width="300">
+  
+  <img width="580" height="893" alt="image" src="https://github.com/user-attachments/assets/c6053ea4-b154-428b-936c-7ed9f02512ef" />
+<img width="695" height="899" alt="image" src="https://github.com/user-attachments/assets/105b19a0-fa7f-4373-9a84-c6b942844773" />
+<img width="680" height="882" alt="image" src="https://github.com/user-attachments/assets/1b768fbd-632b-4622-be9c-d4ba5040c769" />
+
 </div>
 
 *Responsive design working seamlessly across all device sizes*
 
-### Dark Mode Support
-![Dark Mode Dashboard](screenshots/dark-mode-dashboard.png)
-*Dashboard in dark mode with automatic theme switching*
+### Light Mode Support
+<img width="1894" height="802" alt="image" src="https://github.com/user-attachments/assets/7c31ec46-90cb-4df2-9e6e-24c031d30453" />
 
-![Dark Mode Analytics](screenshots/dark-mode-analytics.png)
-*Analytics page with dark theme for better night viewing*
+*Dashboard in light mode with automatic theme switching*
 
 ## 🚀 Features
 
@@ -115,7 +120,7 @@ A comprehensive Django-based personal finance management system with modern UI, 
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/finance-app.git
+git clone https://github.com/tigerlero/financialDjango.git
 cd finance-app
 ```
 
@@ -300,57 +305,19 @@ DATABASES = {
 }
 ```
 
-## 📱 Mobile App Screenshots
-
-### iOS Interface
-<div style="display: flex; gap: 10px;">
-  <img src="screenshots/ios-dashboard.png" alt="iOS Dashboard" width="200">
-  <img src="screenshots/ios-transactions.png" alt="iOS Transactions" width="200">
-  <img src="screenshots/ios-analytics.png" alt="iOS Analytics" width="200">
-  <img src="screenshots/ios-settings.png" alt="iOS Settings" width="200">
-</div>
-
-### Android Interface
-<div style="display: flex; gap: 10px;">
-  <img src="screenshots/android-dashboard.png" alt="Android Dashboard" width="200">
-  <img src="screenshots/android-transactions.png" alt="Android Transactions" width="200">
-  <img src="screenshots/android-analytics.png" alt="Android Analytics" width="200">
-  <img src="screenshots/android-settings.png" alt="Android Settings" width="200">
-</div>
-
 ## 🎨 UI/UX Features
 
 ### Theme Customization
-![Theme Settings](screenshots/theme-settings.png)
+<img width="1562" height="858" alt="image" src="https://github.com/user-attachments/assets/fb3be870-1a83-4ef3-8ccf-8893df1fc06d" />
+
 *Theme customization panel with light, dark, and auto modes*
 
-### Accessibility Features
-![Accessibility](screenshots/accessibility.png)
-*High contrast mode and keyboard navigation support*
-
-### Animation Showcase
-![Animations](screenshots/animations.gif)
-*Smooth transitions and micro-interactions throughout the app*
-
-## 📈 Performance Metrics
-
-### Load Testing Results
-![Performance Metrics](screenshots/performance-metrics.png)
-*Application performance under various load conditions*
-
-### Database Optimization
-![Database Performance](screenshots/db-performance.png)
-*Query optimization results and response times*
-
-## 🔐 Security Features
 
 ### Authentication Flow
-![Login Process](screenshots/login-flow.png)
-*Secure authentication with password strength requirements*
+<img width="490" height="779" alt="image" src="https://github.com/user-attachments/assets/2bf98579-5bf8-4e53-8a61-42fc80900374" />
+<img width="477" height="902" alt="image" src="https://github.com/user-attachments/assets/f25bc8a8-86c3-4c33-a3a4-207b4858b9ed" />
 
-### Data Encryption
-![Security Dashboard](screenshots/security-dashboard.png)
-*Security settings and data protection features*
+*Secure authentication with password strength requirements*
 
 ## 🚀 Deployment
 
@@ -366,33 +333,6 @@ certbot --nginx -d yourdomain.com
 docker-compose exec db pg_dump -U finance_user finance_app > backup.sql
 ```
 
-### Monitoring Dashboard
-![Monitoring](screenshots/monitoring-dashboard.png)
-*System monitoring with metrics and alerts*
-
-## 🤝 Contributing
-
-### Development Workflow
-![Development Process](screenshots/development-workflow.png)
-*Git workflow and contribution guidelines*
-
-### Code Quality
-![Code Quality](screenshots/code-quality.png)
-*Code coverage and quality metrics*
-
-## 📞 Support & Documentation
-
-### Help Center
-![Help Center](screenshots/help-center.png)
-*In-app help system with tutorials and FAQs*
-
-### API Documentation
-![API Docs](screenshots/api-documentation.png)
-*Interactive API documentation with examples*
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -403,68 +343,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📁 Screenshot Directory Structure
 
-To properly display all screenshots, organize them in the following structure:
-
-```
-screenshots/
-├── dashboard.png
-├── transactions-list.png
-├── add-transaction.png
-├── analytics.png
-├── monthly-reports.png
-├── accounts.png
-├── account-details.png
-├── admin-dashboard.png
-├── admin-transactions.png
-├── mobile-dashboard.png
-├── mobile-transactions.png
-├── mobile-analytics.png
-├── dark-mode-dashboard.png
-├── dark-mode-analytics.png
-├── test-coverage.png
-├── ios-dashboard.png
-├── ios-transactions.png
-├── ios-analytics.png
-├── ios-settings.png
-├── android-dashboard.png
-├── android-transactions.png
-├── android-analytics.png
-├── android-settings.png
-├── theme-settings.png
-├── accessibility.png
-├── animations.gif
-├── performance-metrics.png
-├── db-performance.png
-├── login-flow.png
-├── security-dashboard.png
-├── monitoring-dashboard.png
-├── development-workflow.png
-├── code-quality.png
-├── help-center.png
-└── api-documentation.png
-```
-
-## 📝 Screenshot Guidelines
-
-### Taking Screenshots
-1. **Resolution**: Use 1920x1080 for desktop screenshots
-2. **Mobile**: Use actual device screenshots (375x812 for iPhone, 360x640 for Android)
-3. **Quality**: Save as PNG for UI screenshots, GIF for animations
-4. **Consistency**: Use the same browser and zoom level for all screenshots
-5. **Content**: Include realistic sample data, avoid lorem ipsum
-
-### Screenshot Checklist
-- [ ] Dashboard with sample financial data
-- [ ] Transaction list with various transaction types
-- [ ] Add/Edit transaction forms
-- [ ] Analytics charts with real data
-- [ ] Account management interface
-- [ ] Admin dashboard with statistics
-- [ ] Mobile responsive views
-- [ ] Dark mode variations
-- [ ] Error states and validation messages
-- [ ] Loading states and animations
-
-This README structure provides comprehensive visual documentation of your finance application, making it easy for users, contributors, and stakeholders to understand the application's capabilities and interface design.
