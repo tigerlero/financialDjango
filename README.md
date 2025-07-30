@@ -204,18 +204,12 @@ make test-integration
 make test-performance
 ```
 
-### Test Coverage
-![Test Coverage](screenshots/test-coverage.png)
-*Comprehensive test coverage report showing 95%+ coverage*
-
 ### Testing Strategy
 - **Unit Tests**: Model validation and business logic
 - **Integration Tests**: Complete user workflows
 - **API Tests**: REST endpoint functionality
 - **Performance Tests**: Database query optimization
 - **Security Tests**: Data isolation and input validation
-
-## 📊 API Documentation
 
 ### Authentication
 ```bash
