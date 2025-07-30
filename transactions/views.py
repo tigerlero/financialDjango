@@ -193,7 +193,6 @@ def dashboard(request):
     ).select_related('account', 'category')[:10]
     
     total_balance = accounts.aggregate(total_balance=Sum('balance'))['total_balance'] or 0   
-    print(connection.queries[-1]['sql']) 
     context = {
         'accounts': accounts,
         'recent_transactions': recent_transactions,
