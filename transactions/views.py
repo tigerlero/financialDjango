@@ -207,7 +207,6 @@ def account_list(request):
     accounts = Account.objects.filter(user=request.user, is_active=True).order_by('-created_at')
 
     
-    # Calculate totals
     # Efficient DB-side aggregation
     aggregates = accounts.aggregate(
         total_balance=Sum('balance'),
