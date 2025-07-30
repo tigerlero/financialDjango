@@ -1,0 +1,29 @@
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*.pyd
+
+# Cython-generated files
+*.c
+*.cpp
+*.h
+*.so
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# VS Code local history
+.history/
+
+# Virtual environments
+env/
+venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
