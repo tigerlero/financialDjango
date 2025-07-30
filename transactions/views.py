@@ -7,13 +7,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Avg
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 import json
 import logging
-
+from django.db import connection
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -37,14 +37,14 @@ class AccountViewSet(viewsets.ModelViewSet):
         return Account.objects.filter(user=self.request.user, is_active=True)
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user) 
     
     @action(detail=True, methods=['get'])
     def balance(self, request, pk=None):
         """Get current account balance"""
         account = self.get_object()
         return Response({
-            'balance': account.get_balance(),
+            'balance': account.balance,
             'currency': account.currency
         })
     
@@ -192,8 +192,8 @@ def dashboard(request):
         account__user=request.user
     ).select_related('account', 'category')[:10]
     
-    total_balance = sum(account.get_balance() for account in accounts)
-    
+    total_balance = accounts.aggregate(total_balance=Sum('balance'))['total_balance'] or 0   
+    print(connection.queries[-1]['sql']) 
     context = {
         'accounts': accounts,
         'recent_transactions': recent_transactions,
@@ -206,11 +206,17 @@ def dashboard(request):
 def account_list(request):
     """Account list view"""
     accounts = Account.objects.filter(user=request.user, is_active=True).order_by('-created_at')
+
     
     # Calculate totals
-    total_balance = sum(account.get_balance() for account in accounts)
-    account_count = accounts.count()
-    average_balance = total_balance / account_count if account_count > 0 else 0
+    # Efficient DB-side aggregation
+    aggregates = accounts.aggregate(
+        total_balance=Sum('balance'),
+        average_balance=Avg('balance')
+    )
+
+    total_balance = aggregates['total_balance'] or 0
+    average_balance = aggregates['average_balance'] or 0
     
     context = {
         'accounts': accounts,
@@ -276,7 +282,6 @@ def transaction_detail_ajax(request, transaction_id):
                 'name': transaction.to_account.name if transaction.to_account else None,
                 'type': transaction.to_account.get_account_type_display() if transaction.to_account else None
             } if transaction.to_account else None,
-            'notes': transaction.notes or 'No additional notes'
         }
         
         return JsonResponse({'success': True, 'transaction': data})
@@ -389,7 +394,6 @@ def transaction_export(request):
                 txn.get_transaction_type_display(),
                 txn.get_status_display(),
                 txn.to_account.name if txn.to_account else '',
-                txn.notes or ''
             ])
         
         return response
@@ -610,10 +614,10 @@ def quick_transaction(request):
 @login_required
 def analytics(request):
     """Analytics dashboard view"""
-    accounts = Account.objects.filter(user=request.user, is_active=True)
+    accounts = Account.objects.filter(user=request.user, is_active=True).order_by('-created_at')
     
     # Get analytics data
-    total_balance = sum(account.get_balance() for account in accounts)
+    total_balance = accounts.aggregate(total_balance=Sum('balance'))['total_balance']
     total_transactions = Transaction.objects.filter(account__user=request.user).count()
     
     # Monthly spending/income data for charts
@@ -744,7 +748,7 @@ def settings(request):
 @login_required
 def profile(request):
     """User profile view"""
-    accounts = Account.objects.filter(user=request.user, is_active=True)
+    accounts = Account.objects.filter(user=request.user, is_active=True).order_by('-created_at')
     recent_transactions = Transaction.objects.filter(
         account__user=request.user
     ).select_related('account', 'category')[:10]

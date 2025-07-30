@@ -25,10 +25,18 @@ class AccountSerializer(serializers.ModelSerializer):
             'balance', 'currency', 'is_active', 'created_at',
             'current_balance', 'transaction_count'
         ]
-        read_only_fields = ['account_number', 'balance', 'created_at']
+        read_only_fields = ['account_number', 'created_at']
     
     def get_current_balance(self, obj):
         return obj.get_balance()
+    
+    def create(self, validated_data):
+        # Ensure balance is properly handled as Decimal
+        balance = validated_data.get('balance', 0)  # default to 0 if balance is not present
+        validated_data['balance'] = balance
+        instance = super().create(validated_data)
+        instance.save()
+        return instance
     
     def get_transaction_count(self, obj):
         return obj.transactions.count()

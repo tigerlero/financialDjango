@@ -38,22 +38,7 @@ class Account(models.Model):
         return f"{self.name} ({self.account_number})"
     
     def get_balance(self):
-        """Calculate current balance from transactions"""
-        credits = self.transactions.filter(
-            transaction_type='credit', 
-            status='completed'
-        ).aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
-        
-        debits = self.transactions.filter(
-            transaction_type='debit', 
-            status='completed'
-        ).aggregate(
-            total=Sum('amount')
-        )['total'] or Decimal('0.00')
-        
-        return credits - debits
+        return self.balance
     
     def can_debit(self, amount):
         """Check if account can be debited for the amount"""

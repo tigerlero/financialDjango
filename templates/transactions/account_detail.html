@@ -49,7 +49,7 @@
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h2 class="display-4 {% if current_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                    ${{ current_balance|floatformat:2 }}
+                                    ${{ account.balance|floatformat:2 }}
                                 </h2>
                                 <p class="text-muted mb-0">Current Balance</p>
                                 <small class="text-muted">{{ account.currency }}</small>
@@ -317,7 +317,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="transactionDetailsContent">
-                <!-- Transaction details will be loaded here -->
+                <h6>Transaction ID: <span id="transaction-id"></span></h6>
+                <h6>Date: <span id="transaction-date"></span></h6>
+                <h6>Amount: <span id="transaction-amount"></span></h6>
+                <h6>Description: <span id="transaction-description"></span></h6>
+                <!-- Add more fields as needed -->
             </div>
         </div>
     </div>
@@ -440,7 +444,7 @@ function viewTransaction(transactionId) {
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <h6 class="text-muted mb-2">Dates & Notes</h6>
+                        <h6 class="text-muted mb-2">Dates</h6>
                         <table class="table table-borderless table-sm">
                             <tr>
                                 <td class="fw-medium" style="width: 150px;">Transaction Date:</td>
@@ -450,10 +454,7 @@ function viewTransaction(transactionId) {
                                 <td class="fw-medium">Created:</td>
                                 <td>${txn.created_at}</td>
                             </tr>
-                            <tr>
-                                <td class="fw-medium">Notes:</td>
-                                <td>${txn.notes}</td>
-                            </tr>
+                    
                         </table>
                     </div>
                 </div>
