@@ -16,8 +16,10 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-a6+w8=lz#yi1_jeh881ay
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='"financialdjango.onrender.com",localhost,127.0.0.1,0.0.0.0').split(',')
-
+ALLOWED_HOSTS = [
+    'financialdjango.onrender.com',
+    'www.financialdjango.onrender.com',
+]
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
