@@ -181,7 +181,7 @@ python manage.py createsuperuser
 python manage.py runserver
 
 # Start Celery worker (separate terminal)
-celery -A finance_project worker -l info
+celery -A financeapp worker -l info
 ```
 
 ## 🧪 Testing
