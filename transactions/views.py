@@ -207,10 +207,14 @@ def account_list(request):
     accounts = Account.objects.filter(user=request.user, is_active=True).order_by('-created_at')
 
     
-     # Calculate totals
-    total_balance = sum(account.get_balance() for account in accounts)
-    account_count = accounts.count()
-    average_balance = total_balance / account_count if account_count > 0 else 0
+    # Efficient DB-side aggregation
+    aggregates = accounts.aggregate(
+        total_balance=Sum('balance'),
+        average_balance=Avg('balance')
+    )
+
+    total_balance = aggregates['total_balance'] or 0
+    average_balance = aggregates['average_balance'] or 0
     
     context = {
         'accounts': accounts,
