@@ -126,6 +126,8 @@ REST_FRAMEWORK = {
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "financialdjango.onrender.com",
+    "financialdjango.onrender.com::8000",
+    "financialdjango.onrender.com::3000",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8000",
