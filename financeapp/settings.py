@@ -133,8 +133,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://financialdjango.onrender.com:6379/1'
-CELERY_RESULT_BACKEND = 'redis://financialdjango.onrender.com:6379/1'
+CELERY_BROKER_URL = 'redis://redis:6379/1'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/1'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_SERIALIZER = 'json'
