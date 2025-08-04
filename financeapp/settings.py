@@ -71,7 +71,7 @@ WSGI_APPLICATION = "financeapp.wsgi.application"
 # PostgreSQL configuration
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL', default='postgres://django:django123@financialdjango.onrender.com:5432/financeapp')
+        default='postgres://django:django123@db:5432/financeapp'
     )
 }
 
