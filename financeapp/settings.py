@@ -69,10 +69,9 @@ WSGI_APPLICATION = "financeapp.wsgi.application"
 
 # Database
 # PostgreSQL configuration
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://django:django123@db:5432/financeapp'
-    )
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 # Password validation
