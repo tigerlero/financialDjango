@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: financialdjango
+    env: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        value: ""
+      - key: STRIPE_PUBLIC_KEY
+        value: ""
+
+databases:
+  - name: financialdjango-db
+    databaseName: financeapp
+    user: django
+    plan: free

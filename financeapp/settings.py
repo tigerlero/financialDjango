@@ -72,7 +72,7 @@ WSGI_APPLICATION = "financeapp.wsgi.application"
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://django:django123@db:5432/financeapp')
+        default='postgres://django:django123@db:5432/financeapp'
     )
 }
 
