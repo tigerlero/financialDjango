@@ -19,6 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = [
     'financialdjango.onrender.com',
     'www.financialdjango.onrender.com',
+    '.onrender.com',
 ]
 # Application definition
 INSTALLED_APPS = [
@@ -126,9 +127,8 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "financialdjango.onrender.com",
-    "financialdjango.onrender.com::8000",
-    "financialdjango.onrender.com::3000",
+    "https://financialdjango.onrender.com",
+    "https://www.financialdjango.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8000",
