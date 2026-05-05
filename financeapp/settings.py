@@ -71,11 +71,23 @@ WSGI_APPLICATION = "financeapp.wsgi.application"
 # Database
 # PostgreSQL configuration
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://django:django123@db:5432/financeapp'
-    )
-}
+import os
+db_url = os.getenv('DATABASE_URL')
+if db_url:
+    DATABASES = {
+        'default': dj_database_url.parse(db_url)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'financeapp',
+            'USER': 'django',
+            'PASSWORD': 'django123',
+            'HOST': 'db',
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
