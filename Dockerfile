@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # Run the application
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 financeapp.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 financeapp.wsgi:application"]
